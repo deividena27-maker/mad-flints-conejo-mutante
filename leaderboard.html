@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#11140f">
+<title>Ranking compartido | Conejo Mutante</title>
+<style>
+:root{color-scheme:dark;--ink:#11140f;--panel:#191e18;--green:#a2e85a;--yellow:#ffd83d;--paper:#f7f5e9;--muted:#adb2a4;--line:rgba(247,245,233,.15)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,rgba(162,232,90,.1),transparent 34%),var(--ink);color:var(--paper);font:14px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif;padding:14px}.board{max-width:760px;margin:auto;border:1px solid rgba(162,232,90,.42);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012));overflow:hidden;box-shadow:0 18px 45px #0005}.head{padding:16px 18px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}.kicker{color:var(--green);font-size:10px;font-weight:900;letter-spacing:.17em}.head h1{font:700 23px Georgia,serif;margin:4px 0 0}.refresh{border:1px solid rgba(255,216,61,.5);color:var(--yellow);background:#141812;border-radius:999px;padding:8px 11px;font-weight:800;cursor:pointer}.tabs{display:flex;gap:8px;padding:12px 16px 8px}.tab{border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--muted);background:transparent;font-weight:800;cursor:pointer}.tab[aria-selected=true]{background:var(--green);color:#11140f;border-color:var(--green)}.status{padding:3px 18px 10px;color:var(--muted);font-size:12px;min-height:30px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:340px}th,td{padding:11px 16px;border-top:1px solid var(--line);text-align:left}th{font-size:10px;letter-spacing:.12em;color:var(--muted);font-weight:900}td:first-child,th:first-child{text-align:center;width:54px}td:last-child,th:last-child{text-align:right;color:var(--yellow);font-variant-numeric:tabular-nums;font-weight:900}.rank{color:var(--green);font-weight:900}.empty{padding:22px;text-align:center;color:var(--muted)}.foot{padding:11px 16px;border-top:1px solid var(--line);font-size:11px;color:#8d9486}.foot a{color:var(--green)}
+</style>
+</head>
+<body>
+<section class="board" aria-label="Ranking compartido de Conejo Mutante">
+<header class="head"><div><div class="kicker">MAD FLINT’S · COMPETENCIA EN LÍNEA</div><h1>Ranking Conejo Mutante</h1></div><button class="refresh" id="refresh">Actualizar ↻</button></header>
+<nav class="tabs" aria-label="Periodo del ranking"><button class="tab" data-board="all-time" aria-selected="true">Todo el tiempo</button><button class="tab" data-board="weekly" aria-selected="false">Semanal</button><button class="tab" data-board="daily" aria-selected="false">Diario</button></nav>
+<div class="status" id="status" role="status">Cargando ranking…</div>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Jugador</th><th>Puntaje</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty" hidden>Todavía no hay puntajes en este tablero.</div></div>
+<footer class="foot">Clasificación compartida con CheddaBoards · <a href="https://cheddaboards.com/players" target="_blank" rel="noopener">Ver perfiles</a></footer>
+</section>
+<script>
+(()=>{
+const GAME='mad-flints-conejo-mutante';
+const BASE='https://fdvph-sqaaa-aaaap-qqc4a-cai.raw.icp0.io/games/'+GAME+'/scoreboards/';
+let selected='all-time';
+const rows=document.getElementById('rows'),empty=document.getElementById('empty'),status=document.getElementById('status');
+function esc(v){return String(v??'Jugador').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function load(){status.textContent='Cargando ranking…';rows.innerHTML='';empty.hidden=true;try{const r=await fetch(BASE+selected+'?limit=10',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const j=await r.json();if(!j.ok)throw Error(j.error||'No se pudo leer el tablero');const entries=j.data.entries||[];if(!entries.length){empty.hidden=false;status.textContent='0 puntajes compartidos';return}rows.innerHTML=entries.map((e,i)=>`<tr><td class="rank">${Number(e.rank)||i+1}</td><td>${esc(e.nickname)}</td><td>${Number(e.score||0).toLocaleString('es-CO')}</td></tr>`).join('');status.textContent=`${Number(j.data.totalEntries)||entries.length} jugador${(Number(j.data.totalEntries)||entries.length)===1?'':'es'} · actualizado ahora`}catch(e){status.textContent='No se pudo cargar el ranking. Prueba de nuevo en un momento.';console.error(e)}}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.board;document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));load()}));document.getElementById('refresh').addEventListener('click',load);load();
+})();
+</script>
+</body></html>
