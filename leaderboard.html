@@ -21,11 +21,11 @@
 (()=>{
 const GAME='mad-flints-conejo-mutante';
 const BASE='https://fdvph-sqaaa-aaaap-qqc4a-cai.raw.icp0.io/games/'+GAME+'/scoreboards/';
-let selected='all-time';
+const allowedBoards=['all-time','weekly','daily'];let selected=new URLSearchParams(location.search).get('board')||'all-time';if(!allowedBoards.includes(selected))selected='all-time';
 const rows=document.getElementById('rows'),empty=document.getElementById('empty'),status=document.getElementById('status');
 function esc(v){return String(v??'Jugador').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function load(){status.textContent='Cargando ranking…';rows.innerHTML='';empty.hidden=true;try{const r=await fetch(BASE+selected+'?limit=10',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const j=await r.json();if(!j.ok)throw Error(j.error||'No se pudo leer el tablero');const entries=j.data.entries||[];if(!entries.length){empty.hidden=false;status.textContent='0 puntajes compartidos';return}rows.innerHTML=entries.map((e,i)=>`<tr><td class="rank">${Number(e.rank)||i+1}</td><td>${esc(e.nickname)}</td><td>${Number(e.score||0).toLocaleString('es-CO')}</td></tr>`).join('');status.textContent=`${Number(j.data.totalEntries)||entries.length} jugador${(Number(j.data.totalEntries)||entries.length)===1?'':'es'} · actualizado ahora`}catch(e){status.textContent='No se pudo cargar el ranking. Prueba de nuevo en un momento.';console.error(e)}}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.board;document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));load()}));document.getElementById('refresh').addEventListener('click',load);load();
+document.querySelectorAll('.tab').forEach(b=>{b.setAttribute('aria-selected',String(b.dataset.board===selected));b.addEventListener('click',()=>{selected=b.dataset.board;history.replaceState(null,'','?board='+encodeURIComponent(selected));document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));load()})});document.getElementById('refresh').addEventListener('click',load);load();
 })();
 </script>
 </body></html>
